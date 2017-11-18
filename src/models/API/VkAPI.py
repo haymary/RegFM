@@ -1,0 +1,2 @@
+class VkAPI:
+    pass
