@@ -8,24 +8,11 @@ class VKUser(AUser):
         self.uid = vk_user.get('uid')
         self.first_name = vk_user.get('first_name')
         self.last_name = vk_user.get('last_name')
-        self.jobs = []
-        jobs = vk_user.get('career', [])
-        for job in jobs:
-            self.jobs.append(job.get('position', ''))
+        self.jobs = [job.get('position', '') for job in vk_user.get('career', [])]
         self.other_accounts = {'facebook': vk_user.get('facebook', ''),
                                'instagram': vk_user.get('instagram', '')}
-        self.educations = []
-        unis = vk_user.get('universities', [])
-        for uni in unis:
-            self.educations.append(uni.get('faculty_name', ''))
-        self.groups = []
-        for group in groups[1:]:
-            self.groups.append({'name': group.get('name', ''), 'description': group.get('description', '')})
-        self.posts = []
-        posts = wall.get('wall', [])
-        for post in posts[1:]:
-            self.posts.append(post.get('text', ''))
-        self.reposts_from = []
-        reposts = wall.get('groups')
-        for r in reposts:
-            self.reposts_from.append(r.get('name', ''))
+        self.educations = [uni.get('faculty_name', '') for uni in vk_user.get('universities', [])]
+        self.groups = [{'name': group.get('name', ''), 'description': group.get('description', '')} for group in
+                       groups[1:]]
+        self.posts = [post.get('text', '') for post in wall.get('wall', [])[1:]]
+        self.reposts_from = [r.get('name', '') for r in wall.get('groups')]
