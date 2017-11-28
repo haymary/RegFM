@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-
-from src.models.API.API import API
+from src.models.user.AUser import AUser
 
 
 class AUserAnalyzer(ABC):
@@ -15,7 +14,7 @@ class AUserAnalyzer(ABC):
      - User's needs
     """
     @abstractmethod
-    def analyze(self, api: API, user_id):
+    def analyze(self,  user: AUser):
         pass
     
     

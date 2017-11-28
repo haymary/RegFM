@@ -1,0 +1,1 @@
+from src.analysis.AUserAnalyzer import AUserAnalyzerfrom src.models.user.FbUser import FbUserclass FbUserAnalyzer(AUserAnalyzer):    def analyze(self, user: FbUser):        # TODO        return 0        def get_skills(self):        skills = {            'programming': ['programming', 'computer', 'hardwarew']        }        # TODO
