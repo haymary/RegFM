@@ -1,5 +1,6 @@
 import vk
 
+from src.exceptions.VKException import VKException
 from src.models.API.API import API
 from src.models.user.VKUser import VKUser
 from .AProvider import AProvider
@@ -20,6 +21,5 @@ class VKProvider(AProvider):
                 groups = api.get_api().groups.get(user_ids=uid, extended=1, fields=['description'])
                 wall = api.get_api().wall.get(owner_id=uid, extended=1)
             return VKUser(user, wall, groups)
-        except vk.exceptions.VkAPIError as e:
-            pass
-        return None
+        except Exception as e:
+            raise VKException(e)

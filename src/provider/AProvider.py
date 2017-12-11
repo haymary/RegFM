@@ -6,5 +6,5 @@ from src.models.user.AUser import AUser
 
 class AProvider(ABC):
     @abstractmethod
-    def get_user(self, api: API) -> AUser:
+    def get_user(self, uid, access_token: str) -> AUser:
         pass

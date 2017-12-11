@@ -4,14 +4,18 @@ from .AUser import AUser
 class FbUser(AUser):
     def __init__(self, user, albums, events, games, movies, music, television, books):
         super().__init__()
+        
+        # Personal
         self.uid = user.get('id')
         self.first_name = user.get('first_name', '')
         self.last_name = user.get('last_name', '')
-        self.languages = [lang.get('name', '') for lang in user.get('languages')]
         
+        # Skills
+        self.languages = [lang.get('name', '') for lang in user.get('languages')]
         self.education = [school.get('school', {}).get('name', '') for school in user.get('education', {})]
         self.jobs = [job.get('position', {}).get('name', '') for job in user.get('work', {})]
         
+        # Interests
         self.about = user.get('about', '')
         self.favorite_athletes = [a.get('name', '') for a in user.get('favorite_athletes', {})]
         self.favorite_teams = [team.get('name', '') for team in user.get('favorite_teams', {})]

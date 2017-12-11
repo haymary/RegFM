@@ -1,5 +1,6 @@
 import vk
 
+from src.exceptions.VKException import VKException
 from src.models.API.API import API
 from .Auth import Auth
 
@@ -20,5 +21,5 @@ class VKAuth(Auth):
                 vk_api = vk.API(session)
                 self._api = API(vk_api)
             except Exception as e:
-                return None
+                raise VKException(e)
         return self._api
