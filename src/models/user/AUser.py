@@ -2,7 +2,7 @@ from src.helpers.DataManager import DataManager
 
 
 class AUser(object):
-    
+    how_interested = 0
     user_lang = 'en'
     user_langs = []
     

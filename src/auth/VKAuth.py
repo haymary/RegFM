@@ -10,12 +10,14 @@ class VKAuth(Auth):
     access_token = '80023c6180023c6180023c6150805daf338800280023c61da0d229715958beeee683636'
     _api = None
     
-    def __init__(self):
-        pass
+    def __init__(self, access_token):
+        self.access_token = access_token
+        self.get_api(access_token)
     
     def get_api(self) -> API:
         if self._api is None:
             try:
+                # TODO: change for production
                 # session = vk.Session(access_token=self.access_token)
                 session = vk.AuthSession(app_id='6263634', user_login='marikoreneva@gmail.com', user_password='5607Spaceman540031')
                 vk_api = vk.API(session)

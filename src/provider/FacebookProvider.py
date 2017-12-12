@@ -17,10 +17,10 @@ class FacebookProvider(AProvider):
     
     _edges_names = ['albums', 'events', 'games', 'movies', 'music', 'television', 'books']
     
-    def get_user(self, uid='me', access_token='') -> FbUser:
+    def get_user(self, uid='me') -> FbUser:
         # TODO: Delete for production
-        if access_token != '':
-            self._token = access_token
+        if self._access_token != '':
+            self._token = self._access_token
         try:
             request = self._request_base + \
                       uid + '?' + \
