@@ -15,5 +15,9 @@ class AProvider(ABC):
         pass
 
     @abstractmethod
-    def get_user_friends(self, uid) -> List[AUser]:
+    def get_user_friends(self, uid) -> List[dict]:
+        pass
+
+    @abstractmethod
+    def get_user_friends_extended(self, uid) -> List[AUser]:
         pass

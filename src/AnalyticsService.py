@@ -106,7 +106,7 @@ class AnalyticsService:
             'last_name': friend.last_name,
         } for friend in friends]
         return result
-
+    
     def get_meetings(self, social_network: str, user_access_token: str, user_lang: str, attenders):
         """
         Returns users which user might be interested to meet with reasons why
@@ -153,7 +153,7 @@ class AnalyticsService:
             how_common = 0
             common_skills = []
             common_interests = []
-            common_people = []
+            common_friends = []
             
             if attender.get('social_network', {}).get('name', '') == social_network:
                 at = self._get_user_info(
@@ -173,13 +173,16 @@ class AnalyticsService:
                 how_common += len(intersection)
                 # Common people
                 user_friends = self._get_user_friends(social_network, user_access_token)
-                # TODO: Find out how to get other user's friends from sn
-                at_friends = ''
-                # TODO: Find intersection
+                at_friends = self._get_user_friends(social_network, user_access_token, at.uid)
+                u_friends_ids = [friend.get('uid') for friend in user_friends]
+                a_friends_ids = [friend.get('uid') for friend in at_friends]
+                common_friends = [friend for friend in user_friends
+                                  if friend.get('uid') in set(u_friends_ids).intersection(set(a_friends_ids))]
+                how_common += len(common_friends)
             else:
                 # TODO
                 pass
-                    
+    
     # ------------- PRIVATE -------------
     
     def _get_user_info(self, social_network, user_access_token, user_lang, analyzer=None, uid='me'):
@@ -189,12 +192,12 @@ class AnalyticsService:
         analyzer.analyze(user)
         self.evaluator.evaluate(user, user_lang)
         return user
-
-    def _get_user_friends(self, social_network, user_access_token):
+    
+    def _get_user_friends(self, social_network, user_access_token, uid='me'):
         if social_network is 'vk':
-            friends = VKProvider(access_token=user_access_token).get_user_friends()
+            friends = VKProvider(access_token=user_access_token).get_user_friends(uid)
         else:
-            friends = FacebookProvider(access_token=user_access_token).get_user_friends()
+            friends = FacebookProvider(access_token=user_access_token).get_user_friends(uid)
         return friends
     
     def _check_params(self, social_network, user_lang):
