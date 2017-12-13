@@ -5,9 +5,17 @@ import os
 from src.helpers.Paths import Paths
 
 
-class DataManager:
-    paths = ''
+class Singleton(type):
+    _instances = {}
     
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class DataManager(metaclass=Singleton):
+    paths = ''
     work_skills = {}
     user_lnags = ['en', 'ru']
     
@@ -16,6 +24,14 @@ class DataManager:
         if len(self.work_skills.keys()) == 0:
             self.paths = Paths()
             self._import_tags_tables()
+    
+    def skills_weights_to_skills(self, skills_weights, lang):
+        return [self.work_skills.get('skill_names').get(lang)[i]
+                for i, w in enumerate(skills_weights) if w > 0]
+    
+    def skills_weights_to_skills_weights(self, skills_weights, lang):
+        return [{'name': self.work_skills.get('skill_names').get(lang)[i], 'weight': w}
+                for i, w in enumerate(skills_weights) if w > 0]
     
     def _import_tags_tables(self):
         """Loads lists of tags of different categories.

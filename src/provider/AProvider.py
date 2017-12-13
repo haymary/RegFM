@@ -1,3 +1,5 @@
+from typing import List
+
 from abc import ABC, abstractmethod
 
 from src.models.API.API import API
@@ -10,4 +12,8 @@ class AProvider(ABC):
     
     @abstractmethod
     def get_user(self, uid) -> AUser:
+        pass
+
+    @abstractmethod
+    def get_user_friends(self, uid) -> List[AUser]:
         pass

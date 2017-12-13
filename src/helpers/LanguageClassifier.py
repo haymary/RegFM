@@ -3,10 +3,14 @@ from langdetect import detect, lang_detect_exception
 
 
 def detect_lang(text):
-    try:
-        return detect(text)
-    except lang_detect_exception.LangDetectException as e:
-        return 'unknown'
+    # try:
+    #     return detect(text)
+    # except lang_detect_exception.LangDetectException as e:
+    #     return 'unknown'
+    if is_en(text):
+        return 'en'
+    else:
+        return 'ru'
 
 
 def is_en(text):

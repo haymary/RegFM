@@ -13,6 +13,15 @@ class AUser(object):
         
         self.skills = []
         self.interests = []
+        self.interests_from_skills = []
+
+        self.skills_weights = []
+        self.interests_from_skills_weights = []
+        
+        self.employment = {
+            'company': '',
+            'position': ''
+        }
         
     def __repr__(self):
         return "User: %s %s" % (self.first_name, self.last_name)
@@ -25,3 +34,4 @@ class AUser(object):
         """
         if lang in self.user_langs:
             self.user_lang = lang
+    

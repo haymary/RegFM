@@ -1,15 +1,18 @@
 import unittest
-from src.models.API.API import API
 from src.analysis.FbUserAnalyzer import FbUserAnalyzer
-from src.provider.FacebookProvider import FacebookProvider
+from data.users_test.Preloaded_Users import load_test_fb_user
 
 
 class TestFbUserAnalyzer(unittest.TestCase):
     def setUp(self):
         self.analyzer = FbUserAnalyzer()
-        provider = FacebookProvider()
-        u = self.provider.get_user(API(0), '936799846374969')
+        self.u = load_test_fb_user()
+        
+    def test_skill_analyzer_works(self):
+        self.analyzer.analyze_skills(self.u)
+        self.assertTrue(len(self.u.skills) > 0)
         
     def test_skill_analyzer(self):
-        # TODO
-        pass
+        self.analyzer.analyze_skills(self.u)
+        self.assertTrue(len(self.u.skills) > 0)
+        self.assertTrue(self.u.skills[4] > 0)
