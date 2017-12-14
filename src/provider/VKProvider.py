@@ -47,13 +47,6 @@ class VKProvider(AProvider):
             raise VKException(e)
     
     def get_user_friends_extended(self, uid) -> List[VKUser]:
-        friends = []
-        for friend in self._get_user_friends(uid):
-            friends.append(self.get_user(friend.get('uid')))
-            time.sleep(1)
-        return friends
-    
-    def get_all_friends(self):
         try:
             u_fields = ['photo_id', 'career', 'occupation', 'activities', 'interests',
                         'music', 'movies', 'tv', 'books', 'games',

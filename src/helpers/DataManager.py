@@ -2,6 +2,7 @@ import pandas as pd
 import pickle
 import os
 
+from src.exceptions.UnableToLoadDataException import UnableToLoadDataException
 from src.helpers.Paths import Paths
 
 
@@ -22,17 +23,26 @@ class DataManager(metaclass=Singleton):
     def __init__(self):
         self._basepath = os.path.dirname(__file__)
         if len(self.work_skills.keys()) == 0:
-            self.paths = Paths()
-            self._import_tags_tables()
+            try:
+                self.paths = Paths()
+                self._import_tags_tables()
+            except Exception as e:
+                raise UnableToLoadDataException(e)
     
     def skills_weights_to_skills(self, skills_weights, lang):
-        return [self.work_skills.get('skill_names').get(lang)[i]
-                for i, w in enumerate(skills_weights) if w > 0]
+        try:
+            return [self.work_skills.get('skill_names').get(lang)[i]
+                    for i, w in enumerate(skills_weights) if w > 0]
+        except Exception as e:
+            raise UnableToLoadDataException(e)
     
     def skills_weights_to_skills_weights(self, skills_weights, lang):
-        return [{'name': self.work_skills.get('skill_names').get(lang)[i], 'weight': w}
-                for i, w in enumerate(skills_weights) if w > 0]
-    
+        try:
+            return [{'name': self.work_skills.get('skill_names').get(lang)[i], 'weight': w}
+                    for i, w in enumerate(skills_weights) if w > 0]
+        except Exception as e:
+            raise UnableToLoadDataException(e)
+        
     def _import_tags_tables(self):
         """Loads lists of tags of different categories.
         """

@@ -219,7 +219,7 @@ class AnalyticsService:
     
     def _get_user_friends(self, social_network, user_access_token, uid='me'):
         if social_network is 'vk':
-            friends = VKProvider(access_token=user_access_token).get_all_friends()
+            friends = VKProvider(access_token=user_access_token).get_user_friends_extended()
         else:
             friends = FacebookProvider(access_token=user_access_token).get_user_friends_extended(uid)
         return friends

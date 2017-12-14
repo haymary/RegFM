@@ -46,14 +46,20 @@ class FacebookProvider(AProvider):
         :param uid: user id
         :return: list of dicts
         """
-        return [{
-            "uid": friend.get("uid"),
-            "first_name": friend.get("name", '').split(' ')[0],
-            "last_name": friend.get("name", '').split(' ')[-1] if len(list(friend.get("name", ''))) > 1 else ''
-        } for friend in self._get_user_friends(uid)]
+        try:
+            return [{
+                "uid": friend.get("uid"),
+                "first_name": friend.get("name", '').split(' ')[0],
+                "last_name": friend.get("name", '').split(' ')[-1] if len(list(friend.get("name", ''))) > 1 else ''
+            } for friend in self._get_user_friends(uid)]
+        except Exception as e:
+            raise FacebookException(e)
     
     def get_user_friends_extended(self, uid) -> List[FbUser]:
-        return [self.get_user(friend.get('id')) for friend in self._get_user_friends(uid)]
+        try:
+            return [self.get_user(friend.get('id')) for friend in self._get_user_friends(uid)]
+        except Exception as e:
+            raise FacebookException(e)
         
     # ------------- PRIVATE -------------
 
