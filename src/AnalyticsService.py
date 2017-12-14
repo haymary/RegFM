@@ -1,9 +1,11 @@
+from src.analysis.Analyzer import Analyzer
 from src.analysis.EventAnalyzer import EventAnalyzer
 from src.analysis.FbUserAnalyzer import FbUserAnalyzer
 from src.analysis.VKUserAnalyzer import VKUserAnalyzer
 from src.evaluation.Evaluator import Evaluator
 from src.evaluation.EventEvaluator import EventEvaluator
 from src.exceptions.WrongRequestException import WrongRequestException
+from src.helpers.DataManager import DataManager
 from src.models.user.AUser import AUser
 from src.provider.FacebookProvider import FacebookProvider
 from src.provider.VKProvider import VKProvider
@@ -86,14 +88,20 @@ class AnalyticsService:
                 },
                 'first_name',
                 'last_name',
+                'how_interested'
             }
         where:
             social_network['name']: name of social network,
             social_network['id']: id of user,
             first_name: --,
             last_name: --
+            how_interested: system's score of particular user's interes in event
         """
         friends = self._get_user_friends(social_network, user_access_token)
+        analyzer = self.social_network_analyzers.get(social_network)
+        for f in friends:
+            analyzer.analyze(f)
+    
         friends = self.event_evaluator.choose_people_for_event(friends, self.event_analyzer.get_event_types(event_tags))
         
         # To Return format
@@ -104,6 +112,7 @@ class AnalyticsService:
             },
             'first_name': friend.first_name,
             'last_name': friend.last_name,
+            'how_interested': friend.how_interested
         } for friend in friends]
         return result
     
@@ -114,7 +123,7 @@ class AnalyticsService:
         :param user_access_token: Access token for the network
         :param user_lang: language of a user to translate info
         :param attenders: List of people who are going to attend the event
-        A person is represented by dict:
+        A person(attender) is represented by dict:
             {
                 'id',
                 'job_position',
@@ -136,7 +145,7 @@ class AnalyticsService:
                     'interests',
                     'common_people'
                 },
-                interest_score
+                'interest_score'
             }
         where:
             id: id in reg.fm system,
@@ -148,6 +157,8 @@ class AnalyticsService:
         
         analyzer = self.social_network_analyzers.get(social_network)
         user = self._get_user_info(social_network, user_access_token, user_lang, analyzer)
+        
+        people_to_meet = []
         
         for attender in attenders:
             how_common = 0
@@ -163,10 +174,6 @@ class AnalyticsService:
                     attender.get('social_network').get('id'))
                 # Common skills
                 at_skill_names = [s['name'] for s in at.interests_from_skills_weights]
-                for skill in user.interests_from_skills_weights:
-                    if skill['name'] in at_skill_names:
-                        how_common += skill['weight']
-                        common_skills.append(skill['name'])
                 # Common interests
                 intersection = list(set(user.interests).intersection(set(at.interests)))
                 common_interests.extend(intersection)
@@ -180,9 +187,26 @@ class AnalyticsService:
                                   if friend.get('uid') in set(u_friends_ids).intersection(set(a_friends_ids))]
                 how_common += len(common_friends)
             else:
-                # TODO
-                pass
-    
+                at_skill_names = [s['name'] for s in
+                                  DataManager().skills_weights_to_skills(
+                                      Analyzer().analyze_skills(
+                                          attender.get('job_position', '')), user_lang)]
+            
+            for skill in user.interests_from_skills_weights:
+                if skill['name'] in at_skill_names:
+                    how_common += skill['weight']
+                    common_skills.append(skill['name'])
+            people_to_meet.append({
+                'id': attender.get('id'),
+                'reasons':{
+                    'common_skills': common_skills,
+                    'interests': common_interests,
+                    'common_people': common_friends
+                },
+                'interest_score': how_common
+            })
+            return sorted(people_to_meet, key=lambda x: x['how_common'], reverse=True)
+        
     # ------------- PRIVATE -------------
     
     def _get_user_info(self, social_network, user_access_token, user_lang, analyzer=None, uid='me'):
@@ -195,9 +219,9 @@ class AnalyticsService:
     
     def _get_user_friends(self, social_network, user_access_token, uid='me'):
         if social_network is 'vk':
-            friends = VKProvider(access_token=user_access_token).get_user_friends(uid)
+            friends = VKProvider(access_token=user_access_token).get_all_friends()
         else:
-            friends = FacebookProvider(access_token=user_access_token).get_user_friends(uid)
+            friends = FacebookProvider(access_token=user_access_token).get_user_friends_extended(uid)
         return friends
     
     def _check_params(self, social_network, user_lang):

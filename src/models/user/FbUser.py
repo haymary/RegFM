@@ -11,18 +11,22 @@ class FbUser(AUser):
         self.last_name = user.get('last_name', '')
         
         # Skills
-        self.languages = [lang.get('name', '') for lang in user.get('languages')]
-        self.education = [school.get('school', {}).get('name', '') for school in user.get('education', {})]
-        self.jobs = [job.get('position', {}).get('name', '') for job in user.get('work', {})]
+        self.languages = [lang.get('name', '') for lang in user.get('languages', [])]
+        self.education = [school.get('school', {}).get('name', '') for school in user.get('education', [])]
+        self.concentrations = []
+        for school in user.get('education', []):
+            self.concentrations.extend(c.get('name', '') for c in school.get('concentration', []))
+        
+        self.jobs = [job.get('position', {}).get('name', '') for job in user.get('work', [])]
         
         # Interests
         self.about = user.get('about', '')
         self.events = events
         
-        self.favorite_athletes = [a.get('name', '') for a in user.get('favorite_athletes', {})]
-        self.favorite_teams = [team.get('name', '') for team in user.get('favorite_teams', {})]
-        self.inspirational_people = [p.get('name', '') for p in user.get('inspirational_people', {})]
-        self.sports = [s.get('name', '') for s in user.get('sports', {})]
+        self.favorite_athletes = [a.get('name', '') for a in user.get('favorite_athletes', [])]
+        self.favorite_teams = [team.get('name', '') for team in user.get('favorite_teams', [])]
+        self.inspirational_people = [p.get('name', '') for p in user.get('inspirational_people', [])]
+        self.sports = [s.get('name', '') for s in user.get('sports', [])]
         self.albums = albums
         self.games = games
         self.movies = movies

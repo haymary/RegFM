@@ -2,7 +2,7 @@ from .AUser import AUser
 
 
 class VKUser(AUser):
-    def __init__(self, user, wall, groups, employer):
+    def __init__(self, user, wall, groups):
         super().__init__()
         user = user[0]
         
@@ -20,8 +20,13 @@ class VKUser(AUser):
         self.groups = [{'name': group.get('name', ''), 'description': group.get('description', '')} for group in
                        groups[1:]]
         self.posts = [post.get('text', '') for post in wall.get('wall', [])[1:]]
-        self.reposts_from = [r.get('name', '') for r in wall.get('groups')]
-
+        self.reposts_from = [r.get('name', '') for r in wall.get('groups', [])]
+        
+        career = user.get('career', [])
+        if len(career) == 0:
+            employer = ''
+        else:
+            employer = career[-1].get('company', '')
         if len(self.jobs) > 0:
             self.employment = {
                 'company': employer,
