@@ -15,7 +15,7 @@ class FacebookProvider(AProvider):
     _fields = 'first_name,last_name,about,education,favorite_athletes,favorite_teams,inspirational_people,languages,' \
               'sports,work'
     
-    _edges_names = ['albums', 'events', 'games', 'movies', 'music', 'television', 'books']
+    _edges_names = ['events', 'games', 'movies', 'music', 'television', 'books']
 
     # ------------- PUBLIC -------------
 
@@ -48,7 +48,7 @@ class FacebookProvider(AProvider):
         """
         try:
             return [{
-                "uid": friend.get("uid"),
+                "uid": friend.get("id"),
                 "first_name": friend.get("name", '').split(' ')[0],
                 "last_name": friend.get("name", '').split(' ')[-1] if len(list(friend.get("name", ''))) > 1 else ''
             } for friend in self._get_user_friends(uid)]
@@ -64,7 +64,7 @@ class FacebookProvider(AProvider):
     # ------------- PRIVATE -------------
 
     def _search_edge(self, edge, uid='me'):
-        result = self._search_edge_raw(edge, uid='me')
+        result = self._search_edge_raw(edge, uid=uid)
         return [r.get('name') for r in result]
 
     def _search_edge_raw(self, edge, uid='me'):

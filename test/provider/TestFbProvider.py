@@ -14,7 +14,3 @@ class TestFbProvider(unittest.TestCase):
         self.assertTrue(u.first_name == 'Mari')
         self.assertTrue(u.last_name == 'Koreneva')
         self.assertTrue(u.uid == '936799846374969')
-
-        pickle.dump(u, open("fb_user", "wb"))
-        u = pickle.load(open("fb_user", "rb"))
-        print(u)

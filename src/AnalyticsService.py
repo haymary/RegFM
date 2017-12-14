@@ -1,3 +1,5 @@
+import time
+
 from src.analysis.Analyzer import Analyzer
 from src.analysis.EventAnalyzer import EventAnalyzer
 from src.analysis.FbUserAnalyzer import FbUserAnalyzer
@@ -97,7 +99,7 @@ class AnalyticsService:
             last_name: --
             how_interested: system's score of particular user's interes in event
         """
-        friends = self._get_user_friends(social_network, user_access_token)
+        friends = self._get_user_friends(social_network, user_access_token, extended=True)
         analyzer = self.social_network_analyzers.get(social_network)
         for f in friends:
             analyzer.analyze(f)
@@ -170,16 +172,18 @@ class AnalyticsService:
                 at = self._get_user_info(
                     social_network,
                     user_access_token,
+                    user_lang,
                     analyzer,
                     attender.get('social_network').get('id'))
                 # Common skills
-                at_skill_names = [s['name'] for s in at.interests_from_skills_weights]
+                at_skill_weights = at.interests_from_skills_weights
                 # Common interests
                 intersection = list(set(user.interests).intersection(set(at.interests)))
                 common_interests.extend(intersection)
                 how_common += len(intersection)
                 # Common people
                 user_friends = self._get_user_friends(social_network, user_access_token)
+                time.sleep(1)
                 at_friends = self._get_user_friends(social_network, user_access_token, at.uid)
                 u_friends_ids = [friend.get('uid') for friend in user_friends]
                 a_friends_ids = [friend.get('uid') for friend in at_friends]
@@ -187,15 +191,18 @@ class AnalyticsService:
                                   if friend.get('uid') in set(u_friends_ids).intersection(set(a_friends_ids))]
                 how_common += len(common_friends)
             else:
-                at_skill_names = [s['name'] for s in
-                                  DataManager().skills_weights_to_skills(
-                                      Analyzer().analyze_skills(
-                                          attender.get('job_position', '')), user_lang)]
+                
+                at_skill_weights = DataManager().skills_weights_to_skills_weights(
+                                      Analyzer().analyze_skills([attender.get('job_position', '')]),
+                                      user_lang)
             
-            for skill in user.interests_from_skills_weights:
+            at_skill_names = [s['name'] for s in at_skill_weights]
+            
+            for i, skill in enumerate(user.interests_from_skills_weights):
                 if skill['name'] in at_skill_names:
-                    how_common += skill['weight']
+                    how_common += skill['weight'] * at_skill_weights[at_skill_names.index(skill['name'])].get('weight')
                     common_skills.append(skill['name'])
+            
             people_to_meet.append({
                 'id': attender.get('id'),
                 'reasons':{
@@ -205,7 +212,7 @@ class AnalyticsService:
                 },
                 'interest_score': how_common
             })
-            return sorted(people_to_meet, key=lambda x: x['how_common'], reverse=True)
+        return sorted(people_to_meet, key=lambda x: x['interest_score'], reverse=True)
         
     # ------------- PRIVATE -------------
     
@@ -217,11 +224,17 @@ class AnalyticsService:
         self.evaluator.evaluate(user, user_lang)
         return user
     
-    def _get_user_friends(self, social_network, user_access_token, uid='me'):
-        if social_network is 'vk':
-            friends = VKProvider(access_token=user_access_token).get_user_friends_extended()
+    def _get_user_friends(self, social_network, user_access_token, uid='me', extended=False):
+        if extended:
+            if social_network is 'vk':
+                friends = VKProvider(access_token=user_access_token).get_user_friends_extended(uid)
+            else:
+                friends = FacebookProvider(access_token=user_access_token).get_user_friends_extended(uid)
         else:
-            friends = FacebookProvider(access_token=user_access_token).get_user_friends_extended(uid)
+            if social_network is 'vk':
+                friends = VKProvider(access_token=user_access_token).get_user_friends(uid)
+            else:
+                friends = FacebookProvider(access_token=user_access_token).get_user_friends(uid)
         return friends
     
     def _check_params(self, social_network, user_lang):

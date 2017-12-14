@@ -17,4 +17,4 @@ class VKUserAnalyzer(AUserAnalyzer):
         user_groups = list(set(user_groups))
         user_groups.extend(user.posts)
         int1 = Analyzer().analyze_skills(user_groups)
-        user.interests_from_skills_weights = [i1 + i2 for i1, i2 in zip(int1, user.skills)]
+        user.interests_from_skills_weights = [i1 + i2 for i1, i2 in zip(int1, user.skills_weights)]
