@@ -29,9 +29,9 @@ class AnalyticsService:
     def get_user_info(self, social_network: str, user_access_token: str, user_lang: str) -> dict:
         """
         Returns information about a user
-        :param social_network: Name of social network to look for user
+        :param social_network: Name of social network to look for user ('vk' of 'fb')
         :param user_access_token: Access token for the network
-        :param user_lang: language of a user to translate info
+        :param user_lang: code of the language of a user to translate info (only 'en' or 'ru')
         :return: Info about user in a form:
             {
                 'social_network':{
@@ -48,7 +48,7 @@ class AnalyticsService:
                 'needs'
             }
         where:
-            social_network['name']: name of social network,
+            social_network['name']: name of social network ('vk' of 'fb'),
             social_network['id']: id of user,
             first_name: --,
             last_name: --,
@@ -78,10 +78,10 @@ class AnalyticsService:
     def get_user_friends_for_event(self, social_network: str, user_access_token: str, event_tags):
         """
         Returns user's friends who might be interested in event
-        :param social_network: Name of social network to look for user
+        :param social_network: Name of social network to look for user ('vk' of 'fb')
         :param user_access_token: Access token for the network
         :param event_tags: List of tags for that event
-        :return: List of user's friends, sorted by level of interest detected by system, in a form:
+        :return: Sorted list of user's friends, sorted by level of interest detected by system, in a form:
         A person is represented by dict:
             {
                 'social_network':{
@@ -93,11 +93,11 @@ class AnalyticsService:
                 'how_interested'
             }
         where:
-            social_network['name']: name of social network,
+            social_network['name']: name of social network ('vk' of 'fb'),
             social_network['id']: id of user,
             first_name: --,
             last_name: --
-            how_interested: system's score of particular user's interes in event
+            how_interested: system's score of particular user's interest in event
         """
         friends = self._get_user_friends(social_network, user_access_token, extended=True)
         analyzer = self.social_network_analyzers.get(social_network)
@@ -123,7 +123,7 @@ class AnalyticsService:
         Returns users which user might be interested to meet with reasons why
         :param social_network: Name of social network to look for user
         :param user_access_token: Access token for the network
-        :param user_lang: language of a user to translate info
+        :param user_lang: code of the language of a user to translate info (only 'en' or 'ru')
         :param attenders: List of people who are going to attend the event
         A person(attender) is represented by dict:
             {
@@ -217,6 +217,14 @@ class AnalyticsService:
     # ------------- PRIVATE -------------
     
     def _get_user_info(self, social_network, user_access_token, user_lang, analyzer=None, uid='me'):
+        """
+        Gets info abut user from social network and analyzes and evaluates results
+        :param social_network: --
+        :param user_access_token: --
+        :param user_lang: --
+        :param analyzer: AUserAnalyzer object
+        :param uid: id of user in the social network
+        """
         if analyzer is None:
             analyzer = self.social_network_analyzers.get(social_network)
         user = self._get_user_from_sn(social_network, user_access_token, uid)
@@ -225,6 +233,16 @@ class AnalyticsService:
         return user
     
     def _get_user_friends(self, social_network, user_access_token, uid='me', extended=False):
+        """
+        Gets friends of a specified user from a specified network
+        :param social_network: --
+        :param user_access_token: --
+        :param uid: id of user in the social network
+        :param extended: bool
+            if True: program searches for the whole user profile and returns AUser instance for specified social network
+            if False: only fields 'first_name', 'last_name' and 'id' are returned in dict with corresponding fields
+        :return: AUser instance of dict
+        """
         if extended:
             if social_network is 'vk':
                 friends = VKProvider(access_token=user_access_token).get_user_friends_extended(uid)
@@ -242,6 +260,13 @@ class AnalyticsService:
             raise WrongRequestException('Wrong parameter value')
     
     def _get_user_from_sn(self, social_network, user_access_token, uid='me'):
+        """
+        Gets info about user from one of networks
+        :param social_network: --
+        :param user_access_token: --
+        :param uid: --
+        :return: AUser object
+        """
         if social_network is 'vk':
             user = VKProvider(access_token=user_access_token).get_user(uid=uid)
         else:

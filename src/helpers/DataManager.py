@@ -16,6 +16,9 @@ class Singleton(type):
 
 
 class DataManager(metaclass=Singleton):
+    """
+    Singleton class which contains pre-loaded data for analytics
+    """
     paths = ''
     work_skills = {}
     user_lnags = ['en', 'ru']
@@ -28,8 +31,16 @@ class DataManager(metaclass=Singleton):
                 self._import_tags_tables()
             except Exception as e:
                 raise UnableToLoadDataException(e)
-    
+
+    # ------------- PUBLIC -------------
+
     def skills_weights_to_skills(self, skills_weights, lang):
+        """
+        Translates list of weights of skills to names of skills on specified language
+        :param skills_weights: list of weights of skills
+        :param lang: language code ('en' or 'ru')
+        :return: list of names of skills (or professional categories)
+        """
         try:
             return [self.work_skills.get('skill_names').get(lang)[i]
                     for i, w in enumerate(skills_weights) if w > 0]
@@ -37,12 +48,25 @@ class DataManager(metaclass=Singleton):
             raise UnableToLoadDataException(e)
     
     def skills_weights_to_skills_weights(self, skills_weights, lang):
+        """
+        Translates list of weights of skills to names of skills on specified language and returnes them with their
+        weights in dict
+        :param skills_weights: list of weights of skills
+        :param lang: language code ('en' or 'ru')
+        :return: list of names of skills (or professional categories) with corresponding weights in a form:
+        {
+            'name': skill name on specified language,
+            'weight': skill weight
+        }
+        """
         try:
             return [{'name': self.work_skills.get('skill_names').get(lang)[i], 'weight': w}
                     for i, w in enumerate(skills_weights) if w > 0]
         except Exception as e:
             raise UnableToLoadDataException(e)
-        
+
+    # ------------- PRIVATE -------------
+
     def _import_tags_tables(self):
         """Loads lists of tags of different categories.
         """
